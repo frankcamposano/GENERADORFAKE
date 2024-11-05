@@ -4,11 +4,11 @@ import numpy as np
 from io import BytesIO
 from faker import Faker
 
-# Inicializar Faker para generar datos ficticios en español (Perú)
+# Inicializar Faker para generar datos ficticios en español (Colombia)
 fake = Faker('es_CO')
 
 # Función para generar datos ficticios
-def generate_fake_data(num_rows):
+def generate_fake_data(num_rows, selected_columns):
     data = {
         'Nombre': [fake.name() for _ in range(num_rows)],
         'Edad': np.random.randint(18, 70, size=num_rows),
@@ -18,15 +18,25 @@ def generate_fake_data(num_rows):
         'Fecha de Nacimiento': [fake.date_of_birth(minimum_age=18, maximum_age=70) for _ in range(num_rows)],
         'Salario': np.random.randint(30000, 120000, size=num_rows)
     }
-    return pd.DataFrame(data)
+    
+    # Filtrar las columnas seleccionadas
+    filtered_data = {col: data[col] for col in selected_columns}
+    return pd.DataFrame(filtered_data)
 
 # Diseño de la aplicación Streamlit
 st.title("Generador de Datos Falsos")
+
+# Opciones de columnas disponibles
+available_columns = ['Nombre', 'Edad', 'Ciudad', 'Email', 'Teléfono', 'Fecha de Nacimiento', 'Salario']
+
+# Selección de columnas por parte del usuario
+selected_columns = st.multiselect("Selecciona las columnas que deseas incluir:", available_columns, default=available_columns)
+
 num_rows = st.number_input("Número de filas a generar:", min_value=1, max_value=1000, value=10)
 
 if st.button("Generar Datos"):
-    # Generar los datos ficticios
-    df = generate_fake_data(num_rows)
+    # Generar los datos ficticios con las columnas seleccionadas
+    df = generate_fake_data(num_rows, selected_columns)
     st.write(df)
 
     # Convertir el DataFrame a un archivo Excel en memoria
